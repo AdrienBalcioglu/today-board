@@ -2,6 +2,8 @@
 
 Three priorities for the day, no more. The board starts empty every morning.
 
+**[Try it live](https://adrienbalcioglu.github.io/today-board/)**
+
 ## Features
 
 - Three slots, on purpose
