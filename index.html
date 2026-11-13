@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Today Board</title>
+<style>:root{--bg:#f7f7f5;--panel:#fff;--ink:#1c1c1a;--muted:#6b6b66;--line:#e3e3de;--accent:#3d5afe;--accent-ink:#fff;--good:#1a7f4b;--bad:#b3261e;--warn:#9a6700;--soft:#eef0ff;--radius:10px;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--panel:#1d1d1b;--ink:#ececE6;--muted:#9a9a93;--line:#30302c;--accent:#8c9eff;--accent-ink:#11122b;--good:#5fd39a;--bad:#ff8a80;--warn:#e3b341;--soft:#23264a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1080px;margin:0 auto;padding:28px 16px 64px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-size:24px;margin:0;letter-spacing:-.01em}
+h2{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+p.lead{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.grid{display:grid;gap:16px}
+@media(min-width:820px){.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:repeat(3,1fr)}.side{grid-template-columns:340px 1fr}}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:120px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.field{margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 14px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.ghost{border-color:transparent;color:var(--muted);padding:4px 8px}
+button:disabled{opacity:.5;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td input{padding:5px 7px}
+.scroll{overflow-x:auto}
+.stat{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.muted{color:var(--muted)}.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent)}
+.out{white-space:pre-wrap;word-wrap:break-word;font-size:14.5px;min-height:120px}
+.out.mono,code{font-family:var(--mono);font-size:13px}
+.note{font-size:13px;color:var(--muted)}
+footer{margin-top:28px;font-size:13px;color:var(--muted)}
+footer a{color:inherit}
+
+main{max-width:760px}
+.slot{display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.slot:last-child{border-bottom:0}
+.slot .n{font-size:28px;font-weight:700;color:var(--muted);width:28px;text-align:center}
+.slot input[type=checkbox]{width:24px;height:24px;flex:none;accent-color:var(--good)}
+.slot input[type=text]{font-size:18px;border-color:transparent;background:transparent}
+.slot input[type=text]:hover{border-color:var(--line)}
+.slot.done input[type=text]{text-decoration:line-through;color:var(--muted)}
+.hist{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.hist b{white-space:nowrap;min-width:150px}
+.hist span.d{text-decoration:line-through;color:var(--muted)}
+.dots{letter-spacing:2px}
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1 id="date">Today</h1>
+      <p class="lead">Three priorities for the day, no more. The board starts empty every morning and keeps yesterday in the history.</p>
+    </div>
+  </header>
+
+  <section class="panel" id="slots"></section>
+  <p id="status" class="note" role="status"></p>
+
+  <section class="panel" id="carryPanel" hidden>
+    <h2>Left from last time</h2>
+    <div id="carry"></div>
+  </section>
+
+  <section class="panel">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <h2 style="margin:0">History</h2>
+      <span id="streak" class="note"></span>
+    </div>
+    <div id="history"></div>
+    <p id="noHistory" class="note" hidden>Past days will appear here.</p>
+  </section>
+  <footer>MIT license · © 2026 Adrien Balcioglu · Runs entirely in your browser: no account, no API key, no server.</footer>
+</main>
+<script>
+const KEY = 'today-board-v1';
+const $ = (id) => document.getElementById(id);
+const todayKey = () => new Date().toLocaleDateString('en-CA');
+const pretty = (key, opts) => new Date(key + 'T12:00').toLocaleDateString([], opts);
+const empty = () => [0, 1, 2].map(() => ({ text: '', done: false }));
+
+let state = load();
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && Array.isArray(s.items)) return s; } catch {} return { day: todayKey(), items: empty(), history: [], carry: [] }; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
+// A new calendar day: archive the previous board, offer what was not done, start empty.
+function rollover() {
+  if (state.day === todayKey()) return false;
+  const filled = state.items.filter((i) => i.text.trim());
+  if (filled.length) state.history.unshift({ day: state.day, items: filled });
+  state.history = state.history.slice(0, 60);
+  state.carry = filled.filter((i) => !i.done).map((i) => i.text);
+  state.day = todayKey(); state.items = empty(); save();
+  return true;
+}
+
+function render() {
+  $('date').textContent = pretty(state.day, { weekday: 'long', day: 'numeric', month: 'long' });
+  const slots = $('slots'); slots.innerHTML = '';
+  state.items.forEach((item, i) => {
+    const row = document.createElement('div'); row.className = 'slot' + (item.done ? ' done' : '');
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1;
+    const check = document.createElement('input'); check.type = 'checkbox'; check.checked = item.done; check.dataset.check = i; check.disabled = !item.text.trim(); check.setAttribute('aria-label', `Priority ${i + 1} done`);
+    const text = document.createElement('input'); text.type = 'text'; text.value = item.text; text.dataset.text = i; text.placeholder = ['The one thing that makes today a good day', 'Second priority', 'Third priority'][i]; text.setAttribute('aria-label', `Priority ${i + 1}`);
+    row.append(n, check, text); slots.append(row);
+  });
+  const set = state.items.filter((i) => i.text.trim()), done = set.filter((i) => i.done).length;
+  $('status').textContent = !set.length ? 'Start with the first one.' : done === set.length ? 'All done. Anything else today is a bonus.' : `${done} of ${set.length} done.`;
+
+  $('carryPanel').hidden = !state.carry.length;
+  const carry = $('carry'); carry.innerHTML = '';
+  state.carry.forEach((text, i) => {
+    const row = document.createElement('div'); row.className = 'hist';
+    const label = document.createElement('span'); label.style.flex = '1'; label.textContent = text;
+    const add = document.createElement('button'); add.textContent = 'Add to today'; add.dataset.carry = i; add.disabled = state.items.every((x) => x.text.trim());
+    const drop = document.createElement('button'); drop.className = 'ghost'; drop.textContent = 'Drop'; drop.dataset.drop = i;
+    row.append(label, add, drop); carry.append(row);
+  });
+
+  const hist = $('history'); hist.innerHTML = '';
+  state.history.forEach((day) => {
+    const row = document.createElement('div'); row.className = 'hist';
+    const b = document.createElement('b'); b.textContent = pretty(day.day, { weekday: 'short', day: 'numeric', month: 'short' });
+    const dots = document.createElement('span'); dots.className = 'dots'; dots.textContent = day.items.map((i) => (i.done ? '●' : '○')).join('');
+    const list = document.createElement('span'); list.style.flex = '1';
+    day.items.forEach((i, k) => { const s = document.createElement('span'); if (i.done) s.className = 'd'; s.textContent = i.text; list.append(s); if (k < day.items.length - 1) list.append(' · '); });
+    row.append(b, dots, list); hist.append(row);
+  });
+  $('noHistory').hidden = state.history.length > 0;
+  let streak = 0; for (const d of state.history) { if (d.items.length && d.items.every((i) => i.done)) streak++; else break; }
+  $('streak').textContent = streak > 1 ? `${streak} days in a row with everything done` : '';
+}
+
+$('slots').addEventListener('input', (e) => {
+  if (e.target.dataset.text === undefined) return;
+  const item = state.items[+e.target.dataset.text]; item.text = e.target.value; if (!item.text.trim()) item.done = false; save();
+});
+$('slots').addEventListener('change', (e) => {
+  if (e.target.dataset.check !== undefined) state.items[+e.target.dataset.check].done = e.target.checked;
+  save(); render();
+});
+$('slots').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.dataset.text !== undefined) { e.target.blur(); document.querySelector(`[data-text="${+e.target.dataset.text + 1}"]`)?.focus(); } });
+$('carry').addEventListener('click', (e) => {
+  const d = e.target.dataset;
+  if (d.carry !== undefined) { const slot = state.items.find((x) => !x.text.trim()); if (!slot) return; slot.text = state.carry[+d.carry]; state.carry.splice(+d.carry, 1); }
+  else if (d.drop !== undefined) state.carry.splice(+d.drop, 1);
+  else return;
+  save(); render();
+});
+// The page may stay open overnight: check for a new day when it becomes visible again.
+document.addEventListener('visibilitychange', () => { if (!document.hidden && rollover()) render(); });
+setInterval(() => { if (rollover()) render(); }, 60000);
+rollover(); render();
+</script>
+</body>
+</html>
