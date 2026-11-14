@@ -2,7 +2,7 @@
 
 Three priorities for the day, no more. The board starts empty every morning.
 
-**[Try it live](https://adrienbalcioglu.github.io/today-board/)**
+**[Website](https://adrienbalcioglu.github.io/today-board/about.html)** · **[Open the app](https://adrienbalcioglu.github.io/today-board/)**
 
 ## Features
 
